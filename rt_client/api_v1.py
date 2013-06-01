@@ -34,7 +34,7 @@ class RT_Client:
             m += str(value)
             m += '|'
         if self.debug:
-            print 'macInput: ',
+            print 'macInput:',
             print m
         return m
 
@@ -49,7 +49,7 @@ class RT_Client:
             print data
         r = requests.post(self.url, headers=headers, data=json.dumps(data))
         if self.debug:
-            print 'Server response: ',
+            print 'Server response:',
             print r.status_code, r.text
         return r.status_code
 
@@ -96,9 +96,13 @@ class RT_Data:
         self.altitude = altitude
         self.temperature = temperature
         self.annotation = annotation
+        self.extra = dict()
 
     def buildData(self):
         ''' Builds data-dictionary suitable for RuuviTracker server '''
+        def removeNonASCII(s):
+            return "".join(i for i in s if ord(i) < 128).replace(' ', '-')
+
         data = dict()
         # latitude can be a float (62.8723) or string (6284.21,N)
         if self.latitude:
@@ -131,4 +135,11 @@ class RT_Data:
             data['temperature'] = float(self.temperature)
         if self.annotation:
             data['annotation'] = str(self.annotation)
+        if self.extra and type(self.extra) == dict:
+            for k, v in self.extra.iteritems():
+                k = removeNonASCII(k)
+                if k.startswith('X-'):
+                    data['%s' % k] = v
+                else:
+                    data['X-%s' % k] = v
         return data
