@@ -4,7 +4,7 @@ import gpxpy
 from dateutil import tz
 from time import mktime, sleep
 from random import randint
-from rt_client import RT_Client, RT_Data
+from rt_client.api_v1 import RT_Client, RT_Data
 
 
 if __name__ == '__main__':
