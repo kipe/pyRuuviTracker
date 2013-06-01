@@ -105,35 +105,35 @@ class RT_Data:
 
         data = dict()
         # latitude can be a float (62.8723) or string (6284.21,N)
-        if self.latitude:
+        if self.latitude is not None:
             data['latitude'] = self.latitude
         # longitude can be a float (28.8723) or string (2884.21,N)
-        if self.longitude:
+        if self.longitude is not None:
             data['longitude'] = self.longitude
-        if self.time:
+        if self.time is not None:
             # if instance of datetime is passed, format it according to the spec
             if type(self.time) == datetime:
                 data['time'] = self.time.strftime('%Y-%m-%dT%H:%M:%S.000%z')
             # else trust that the user has done the required measures to format it
             else:
                 data['time'] = str(self.time)
-        if self.accuracy:
+        if self.accuracy is not None:
             data['accuracy'] = float(self.latitude)
-        if self.vertical_accuracy:
+        if self.vertical_accuracy is not None:
             data['vertical_accuracy'] = float(self.vertical_accuracy)
-        if self.heading:
+        if self.heading is not None:
             data['heading'] = float(self.heading)
-        if self.satellite_count:
+        if self.satellite_count is not None:
             data['satellite_count'] = int(self.satellite_count)
-        if self.battery:
+        if self.battery is not None:
             data['battery'] = float(self.battery)
-        if self.speed:
+        if self.speed is not None:
             data['speed'] = float(self.speed)
-        if self.altitude:
+        if self.altitude is not None:
             data['altitude'] = float(self.altitude)
-        if self.temperature:
+        if self.temperature is not None:
             data['temperature'] = float(self.temperature)
-        if self.annotation:
+        if self.annotation is not None:
             data['annotation'] = str(self.annotation)
         if self.extra and type(self.extra) == dict:
             for k, v in self.extra.iteritems():
