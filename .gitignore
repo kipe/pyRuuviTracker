@@ -3,4 +3,6 @@ include
 lib
 local
 build
+dist
+*.egg-info
 *.pyc
