@@ -34,8 +34,7 @@ class RT_Client:
             m += str(value)
             m += '|'
         if self.debug:
-            print 'macInput:',
-            print m
+            print('macInput: %s' % m)
         return m
 
     def __makeQuery(self, data):
@@ -45,12 +44,10 @@ class RT_Client:
             'Content-type': 'application/json'
         }
         if self.debug:
-            print 'Sending data:',
-            print data
+            print('Sending data:' % data)
         r = requests.post(self.url, headers=headers, data=json.dumps(data))
         if self.debug:
-            print 'Server response:',
-            print r.status_code, r.text
+            print('Server response: %s (%s)' % (r.status_code, r.text))
         return r.status_code
 
     def _computeHMac(self, data):
@@ -70,7 +67,7 @@ class RT_Client:
         ''' Sends message to server. Argument "data" must be an instance of RT_Data '''
         if not isinstance(data, RT_Data):
             if self.debug:
-                print 'Incompatible datatype, use RT_Data'
+                print('Incompatible datatype, use RT_Data')
             return
 
         data = self._createMessage(data.buildData())
