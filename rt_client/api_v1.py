@@ -5,7 +5,7 @@ import json
 from datetime import datetime
 
 
-class RT_Client:
+class RT_Client(object):
     ''' Client for RuuviTracker API v1 '''
     API_VERSION = 1
     USER_AGENT = 'RuuviTracker Python Client API v1/0.1'
@@ -74,7 +74,7 @@ class RT_Client:
         return self.__makeQuery(data)
 
 
-class RT_Data:
+class RT_Data(object):
     ''' Data instance for RuuviTracker '''
     def __init__(
             self, latitude=None, longitude=None, time=None,
