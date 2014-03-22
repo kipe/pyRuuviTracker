@@ -31,8 +31,7 @@ if __name__ == '__main__':
     rt = RT_Client(
         tracker_code,
         shared_secret,
-        'http://dev-server.ruuvitracker.fi/api/v1-dev/events',
-        debug=True)
+        'http://dev-server.ruuvitracker.fi/api/v1-dev/events')
     # set session name
     rt.session_code = 'TestSession_%i' % randint(1, 30000)
 
@@ -59,6 +58,6 @@ if __name__ == '__main__':
                     p.latitude, p.longitude, p.time,
                     speed=p.speed, altitude=p.elevation)
                 # send the RT_Data -object to server
-                rt.sendMessage(d)
+                rt.send_message(d)
                 # set last point timestamp to current
                 last = cur_timestamp

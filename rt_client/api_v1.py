@@ -1,8 +1,12 @@
+# -*- encoding: utf-8 -*-
 import hashlib
 import hmac
 import requests
 import json
 from datetime import datetime
+import logging
+
+logger = logging.getLogger('RT_Client')
 
 
 class RT_Client(object):
@@ -10,21 +14,14 @@ class RT_Client(object):
     API_VERSION = 1
     USER_AGENT = 'RuuviTracker Python Client API v1/0.1'
 
-    def __init__(
-            self,
-            tracker_code,
-            shared_secret,
-            url,
-            session_code=None,
-            debug=False):
+    def __init__(self, tracker_code, shared_secret, url, session_code=None):
         ''' Initialize RuuviTracker Client '''
         self.tracker_code = tracker_code
         self.shared_secret = shared_secret
         self.url = url
         self.session_code = session_code
-        self.debug = debug
 
-    def __macInput(self, data):
+    def __mac_input(self, data):
         ''' Generate input for HMac calculation '''
         m = ''
         for key in sorted(data.iterkeys()):
@@ -33,45 +30,41 @@ class RT_Client(object):
             m += ':'
             m += str(value)
             m += '|'
-        if self.debug:
-            print('macInput: %s' % m)
+        logger.debug('macInput: %s' % m)
         return m
 
-    def __makeQuery(self, data):
+    def __make_query(self, data):
         ''' Make query to RuuviTracker server '''
         headers = {
             'User-Agent': self.USER_AGENT,
             'Content-type': 'application/json'
         }
-        if self.debug:
-            print('Sending data:' % data)
+        logger.debug('Sending data:' % data)
         r = requests.post(self.url, headers=headers, data=json.dumps(data))
-        if self.debug:
-            print('Server response: %s (%s)' % (r.status_code, r.text))
+        logger.debug('Server response: %s (%s)' % (r.status_code, r.text))
         return r.status_code
 
-    def _computeHMac(self, data):
+    def _compute_hmac(self, data):
         ''' Calculate HMac for message '''
         digest = hmac.new(self.shared_secret, digestmod=hashlib.sha1)
-        digest.update(self.__macInput(data))
+        digest.update(self.__mac_input(data))
         return digest.hexdigest()
 
-    def _createMessage(self, data):
+    def _create_message(self, data):
         ''' Create message to send to server '''
         data['version'] = self.API_VERSION
         data['tracker_code'] = self.tracker_code
-        data['mac'] = self._computeHMac(data)
+        data['mac'] = self._compute_hmac(data)
         return data
 
-    def sendMessage(self, data):
+    def send_message(self, data):
         ''' Sends message to server. Argument "data" must be an instance of RT_Data '''
         if not isinstance(data, RT_Data):
-            if self.debug:
-                print('Incompatible datatype, use RT_Data')
+            logger.error('Incompatible datatype, use RT_Data')
             return
 
-        data = self._createMessage(data.buildData())
-        return self.__makeQuery(data)
+        data = self._create_message(data.build_data())
+        return self.__make_query(data)
 
 
 class RT_Data(object):
@@ -80,7 +73,8 @@ class RT_Data(object):
             self, latitude=None, longitude=None, time=None,
             accuracy=None, vertical_accuracy=None, heading=None,
             satellite_count=None, battery=None, speed=None,
-            altitude=None, temperature=None, annotation=None):
+            altitude=None, temperature=None, annotation=None,
+            extra=dict()):
         self.latitude = latitude
         self.longitude = longitude
         self.time = time
@@ -93,11 +87,11 @@ class RT_Data(object):
         self.altitude = altitude
         self.temperature = temperature
         self.annotation = annotation
-        self.extra = dict()
+        self.extra = extra
 
-    def buildData(self):
+    def build_data(self):
         ''' Builds data-dictionary suitable for RuuviTracker server '''
-        def removeNonASCII(s):
+        def remove_non_ascii(s):
             return "".join(i for i in s if ord(i) < 128).replace(' ', '-')
 
         data = dict()
@@ -134,7 +128,7 @@ class RT_Data(object):
             data['annotation'] = str(self.annotation)
         if self.extra and type(self.extra) == dict:
             for k, v in self.extra.iteritems():
-                k = removeNonASCII(k)
+                k = remove_non_ascii(k)
                 if k.startswith('X-'):
                     data['%s' % k] = v
                 else:
